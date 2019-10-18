@@ -1,0 +1,133 @@
+<html>
+<head>
+<title>GamEng Demo</title>
+<style>
+#demo {
+    margin: 0 auto;
+    display: block;
+    background: black;
+    border: 1px solid white;
+    visibility: hidden;
+}
+</style>
+</head>
+<body>
+<div>
+<canvas id="demo" tabindex="1"></canvas>
+</div>
+<script src="http://yui.yahooapis.com/3.3.0/build/yui/yui-min.js" charset="utf-8"></script>
+<script src="gameng.js"></script>
+<script>
+YUI().use('node', 'event', 'game_GamEng', function (Y) {
+    var i,
+        canvas = Y.one('#demo'),
+        gameng = new Y.game.GamEng(canvas),
+        ballObj,
+        brickObj,
+        bgObj;
+        
+    gameng.init(1000, 700);
+    // BG
+    bgObj = new Y.game.GameProp();
+    bgObj.init("bg1.png", 0, 0, 1000, 700);
+    gameng.addDesignerObject(bgObj);
+    //Bricks
+    for (i = 0; i < 35; i++) {
+        brickObj = new Y.game.GameProp(),
+            start = (32 * i);
+        brickObj.movable = true;
+        brickObj.init('brick.png', start, 500);
+        gameng.addObject(brickObj);
+    }
+    for (i = 0; i < 35; i++) {
+        brickObj = new Y.game.GameProp(),
+            start = (32 * i);
+        brickObj.init('brick.png', start, 468);
+        gameng.addObject(brickObj);
+    }
+    //Tree
+    treeObj = new Y.game.GameProp();
+    treeObj.init("tree.png", 60, 210); 
+    gameng.addObject(treeObj);
+    
+    // ship
+    shipObj = new Y.game.GameProp();
+    shipObj.movable = true;
+    shipObj.init("ship_idle.png", 500, 550); 
+    shipObj.arrowKeysControl = true;
+    shipObj.userKeyboardControl = true;
+    shipObj.on('keyup', function (e) {
+        var loadEvnt = this.on('load', function (e) {
+            gameng.moveObj(this, 0, 0);
+        }, this);
+        this.moving = false;
+        this.setImage('ship_idle.png');
+        e.halt();
+    }, shipObj);
+    shipObj.on('arrow', function (e) {
+        var left = 0,
+            top = 0;
+        this.lastDirction = e.direction;
+        if ('left' === e.direction) {
+            if (false === this.moving) {
+                this.setImage('ship_idle_left.png');
+            }
+            left = -10;
+        } else  if ('right' === e.direction) {
+            if (false === this.moving) {
+                this.setImage('ship_idle_right.png');
+            }
+            left = 10;
+        } else if ('up' === e.direction) {
+            top = -10;
+        } else if ('down' === e.direction) {
+            top = 10;
+        }
+        this.moving = true;
+        gameng.moveObj(this, left, top);
+        e.halt();
+    }, shipObj);
+    gameng.addObject(shipObj);
+    // Cat
+    /*
+    catObj = new Y.game.GameProp();
+    catObj.movable = true;
+    catObj.init("cat.png", 500, 550); 
+    catObj.arrowKeysControl = true;
+    catObj.on('arrow', function (e) {
+        var left = 0,
+            top = 0;
+        if ('left' === e.direction) {
+            left = -10;
+        }
+        if ('right' === e.direction) {
+            left = 10;
+        }
+        if ('up' === e.direction) {
+            top = -10;
+        }
+        if ('down' === e.direction) {
+            top = 10;
+        }
+        gameng.moveObj(this, left, top);
+    }, catObj);
+    gameng.addObject(catObj);
+    */
+    //Ball
+    ballObj = new Y.game.GameProp();
+    ballObj.movable = true;
+    ballObj.userMouseControl = true;
+    ballObj.init("ball.png", 300, 580);
+    ballObj.on('click', function (e) {
+        var loadEvnt = this.on('load', function (e) {
+            gameng.moveObj(this, 0, 0);
+            Y.later(600, this, function() {gameng.removeObj(this);});
+        }, this);
+        this.setImage('ship_fire.png');
+    }, ballObj);
+    gameng.addObject(ballObj); 
+    gameng.start();
+})
+</script>
+</body>
+</html>
